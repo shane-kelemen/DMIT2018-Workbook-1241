@@ -1,4 +1,4 @@
-# CPSC1517 Workbook 1241
+# DMIT2018 Workbook 1241
 
 ## Shane Kelemen
 
