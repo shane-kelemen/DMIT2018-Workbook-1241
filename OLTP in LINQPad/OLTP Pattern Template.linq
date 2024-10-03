@@ -3,11 +3,16 @@
 #region Driver - Test Data for Testing Method Calls
 void Main()
 {
-	// Setting up batches of test data to use for calling out testing methods
+	// Set up batches of test data to use for calling out testing methods
+	// Make sure to include the "happy path", or the successful test cases, but
+	// also make sure you include every test case that will result in exceptions
+	// being trown or other failures.
 }
 #endregion
 
 
+// We create the testing methods as separate from main so that several calls with different
+// sets of data may be initiated from main, covering all of the pass and fail cases.
 #region Testing Method(s) - Destined to be the base for Client Side Code Behind
 public ViewModel Test_SomeMethod(/* Input data required goes here  */)
 {
@@ -44,17 +49,9 @@ public ViewModel Test_SomeMethod(/* Input data required goes here  */)
 #endregion
 
 
-#region Support (Helper) Methods - To support operation in Testing / System Library Methods
-public Exception GetInnerException(Exception ex)
-{
-	while(ex.InnerException != null)
-		ex = ex.InnerException;
-	
-	return ex;
-}
-#endregion
-
-
+// The database interactions will be performed through these library methods.  Before the 
+// operations are performed, the data must be checked to ensure that it is valid, and business 
+// rules must be enforeced.  Exceptions are thrown for any violation of data or business rules.
 #region System Library Methods - LINQ Interactions with Entity Framework
 public ViewModel GetData(/* Input data required goes here  */)
 {
@@ -74,7 +71,8 @@ public ViewModel GetData(/* Input data required goes here  */)
 	}
 	#endregion
 	
-	// The processing code for the method goes after this note
+	// The processing code for the method goes after this note.
+	// Example, a LINQ query might be completed.
 	
 	
 	return vm;
@@ -82,6 +80,22 @@ public ViewModel GetData(/* Input data required goes here  */)
 #endregion
 
 
+// Any support methods are also going to be consistent. Once defined they should not change and should be
+// usable in multiple places within your projects.  These may include methods for supporting the code behind
+// and / or the system libraries.  It is important to note that if needed in both projects, they should be
+// defined once in each project, or placed in a third utility library.
+#region Support (Helper) Methods - To support operation in Testing / System Library Methods
+public Exception GetInnerException(Exception ex)
+{
+	while (ex.InnerException != null)
+		ex = ex.InnerException;
+
+	return ex;
+}
+#endregion
+
+
+// Put all your View Models in this bottom section.  Once they are defined they will remain consistent 
 #region View Models - Used for moving data between code behind pages and the System Library Methods
 public class ViewModel
 {
