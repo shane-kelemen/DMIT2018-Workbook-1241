@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HogWildWebApp", "HogWildWebApp\HogWildWebApp.csproj", "{87BE3778-E85F-4826-ABA8-3EE1F8C06870}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HogWildSystem", "HogWildSystem\HogWildSystem.csproj", "{AECDDA52-B771-4957-9F73-192E9ECC2E91}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87BE3778-E85F-4826-ABA8-3EE1F8C06870}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87BE3778-E85F-4826-ABA8-3EE1F8C06870}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87BE3778-E85F-4826-ABA8-3EE1F8C06870}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87BE3778-E85F-4826-ABA8-3EE1F8C06870}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AECDDA52-B771-4957-9F73-192E9ECC2E91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AECDDA52-B771-4957-9F73-192E9ECC2E91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AECDDA52-B771-4957-9F73-192E9ECC2E91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AECDDA52-B771-4957-9F73-192E9ECC2E91}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0360248D-586C-4671-84A3-964BE014B1A5}
+	EndGlobalSection
+EndGlobal
