@@ -10,7 +10,7 @@ using HogWildSystem.ViewModels;
 
 namespace HogWildSystem.BLL
 {
-    public  class WorkingVersionsService
+    public class WorkingVersionsService
     {
         private readonly HogWildContext _hogWildContext;
 

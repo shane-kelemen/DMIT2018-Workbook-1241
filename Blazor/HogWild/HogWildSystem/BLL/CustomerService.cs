@@ -1,4 +1,6 @@
-﻿using HogWildSystem.DAL;
+﻿#nullable disable
+using HogWildSystem.DAL;
+using HogWildSystem.Entities;
 using HogWildSystem.ViewModels;
 
 namespace HogWildSystem.BLL
@@ -51,10 +53,44 @@ namespace HogWildSystem.BLL
                     Phone = x.Phone,
                     Email = x.Email,
                     StatusID = x.StatusID,
-                    TotalSales = x.Invoices.Sum(x => x.SubTotal + x.Tax)
+                    TotalSales = x.Invoices.Sum(x => x.RemoveFromViewFlag ? 0 : x.SubTotal + x.Tax)
                 })
-                .OrderBy(x => x.LastName)
+                .OrderByDescending(x => x.TotalSales)
+                .ThenBy(x => x.LastName)
                 .ToList();
+        }
+
+        public CustomerEditView GetCustomer(int customerID)
+        {
+            //  Business Rules
+            //	These are processing rules that need to be satisfied
+            //		for valid data
+            //		rule:	customerID must be valid 
+
+            if (customerID == 0)
+            {
+                throw new ArgumentNullException("Please provide a customer");
+            }
+
+            return _hogWildContext.Customers
+                .Where(x => (x.CustomerID == customerID
+                             && x.RemoveFromViewFlag == false))
+                .Select(x => new CustomerEditView
+                {
+                    CustomerID = x.CustomerID,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    Address1 = x.Address1,
+                    Address2 = x.Address2,
+                    City = x.City,
+                    ProvStateID = x.ProvStateID,
+                    CountryID = x.CountryID,
+                    PostalCode = x.PostalCode,
+                    Phone = x.Phone,
+                    Email = x.Email,
+                    StatusID = x.StatusID,
+                    RemoveFromViewFlag = x.RemoveFromViewFlag
+                }).FirstOrDefault();
         }
     }
 }
