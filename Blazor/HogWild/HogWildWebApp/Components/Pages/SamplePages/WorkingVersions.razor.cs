@@ -13,6 +13,7 @@ namespace HogWildWebApp.Components.Pages.SamplePages
 
         private string feedback;
         #endregion
+
         #region Properties
         // This attribute marks the property for dependency injection
         [Inject]
