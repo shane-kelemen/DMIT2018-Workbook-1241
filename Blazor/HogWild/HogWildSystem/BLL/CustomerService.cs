@@ -7,11 +7,17 @@ namespace HogWildSystem.BLL
 {
     public class CustomerService
     {
+
+        #region Fields
+
         private readonly HogWildContext _hogWildContext;
 
-        //  Constructor for the CustomerService class.
+        #endregion
+
+        //  Constructor for the WorkingVersionsService class.
         internal CustomerService(HogWildContext hogWildContext)
         {
+            //  Initialize the _hogWildContext field with the provided HogWoldContext instance.
             _hogWildContext = hogWildContext;
         }
 
@@ -41,23 +47,23 @@ namespace HogWildSystem.BLL
             }
 
             return _hogWildContext.Customers
-                .Where(x => (x.LastName.Contains(lastName.Trim())
-                             || x.Phone.Contains(phone.Trim()))
-                            && !x.RemoveFromViewFlag)
-                .Select(x => new CustomerSearchView
-                {
-                    CustomerID = x.CustomerID,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    City = x.City,
-                    Phone = x.Phone,
-                    Email = x.Email,
-                    StatusID = x.StatusID,
-                    TotalSales = x.Invoices.Sum(x => x.RemoveFromViewFlag ? 0 : x.SubTotal + x.Tax)
-                })
-                .OrderByDescending(x => x.TotalSales)
-                .ThenBy(x => x.LastName)
-                .ToList();
+                        .Where(x => (x.LastName.Contains(lastName.Trim())
+                                     || x.Phone.Contains(phone.Trim()))
+                                    && !x.RemoveFromViewFlag)
+                        .Select(x => new CustomerSearchView
+                        {
+                            CustomerID = x.CustomerID,
+                            FirstName = x.FirstName,
+                            LastName = x.LastName,
+                            City = x.City,
+                            Phone = x.Phone,
+                            Email = x.Email,
+                            StatusID = x.StatusID,
+                            TotalSales = x.Invoices.Sum(x => x.SubTotal + x.Tax)
+                        })
+                        .OrderByDescending(x => x.TotalSales)
+                        .ThenBy(x => x.LastName)
+                        .ToList();
         }
 
         public CustomerEditView GetCustomer(int customerID)
@@ -91,6 +97,110 @@ namespace HogWildSystem.BLL
                     StatusID = x.StatusID,
                     RemoveFromViewFlag = x.RemoveFromViewFlag
                 }).FirstOrDefault();
+        }
+
+        public CustomerEditView AddEditCustomer(CustomerEditView editCustomer)
+        {
+            #region Business Logic and Parameter Exceptions
+            //	create a list<Exception> to contain all discovered errors
+            List<Exception> errorList = new List<Exception>();
+            //  Business Rules
+            //	These are processing rules that need to be satisfied
+            //		for valid data
+
+            //		rule:	customer cannot be null	
+            if (editCustomer == null)
+            {
+                throw new ArgumentNullException("No customer was supply");
+            }
+
+            //		rule: 	first name, last name, phone number and email are required (not empty)
+            if (string.IsNullOrWhiteSpace(editCustomer.FirstName))
+            {
+                errorList.Add(new Exception("First name is required"));
+            }
+
+            if (string.IsNullOrWhiteSpace(editCustomer.LastName))
+            {
+                errorList.Add(new Exception("Last name is required"));
+            }
+
+            if (string.IsNullOrWhiteSpace(editCustomer.Email))
+            {
+                errorList.Add(new Exception("Email is required"));
+            }
+
+            if (string.IsNullOrWhiteSpace(editCustomer.Phone))
+            {
+                errorList.Add(new Exception("Phone is required"));
+            }
+
+            //		rule: 	first name, last name and phone number cannot be duplicated (found more than once)
+            if (editCustomer.CustomerID == 0)
+            {
+                bool customerExist = _hogWildContext.Customers
+                                .Where(x => x.FirstName == editCustomer.FirstName
+                                            && x.LastName == editCustomer.LastName
+                                            && x.Phone == editCustomer.Phone)
+                                .Any();
+
+                if (customerExist)
+                {
+                    errorList.Add(new Exception("Customer already exist in the database and cannot be enter again"));
+                }
+            }
+
+            if (errorList.Count > 0)
+            {
+                //  we need to clear the "track changes" otherwise we leave our entity system in flux
+                _hogWildContext.ChangeTracker.Clear();
+                //  throw the list of business processing error(s)
+                throw new AggregateException("Unable to add or edit customer. Please check error message(s)", errorList);
+            }
+
+
+            #endregion
+            Customer customer =
+                _hogWildContext.Customers.Where(x => x.CustomerID == editCustomer.CustomerID)
+                            .Select(x => x).FirstOrDefault();
+
+            //  new customer
+            if (customer == null)
+            {
+                customer = new Customer();
+            }
+
+            customer.FirstName = editCustomer.FirstName;
+            customer.LastName = editCustomer.LastName;
+            customer.Address1 = editCustomer.Address1;
+            customer.Address2 = editCustomer.Address2;
+            customer.City = editCustomer.City;
+            customer.ProvStateID = editCustomer.ProvStateID;
+            customer.CountryID = editCustomer.CountryID;
+            customer.PostalCode = editCustomer.PostalCode;
+            customer.Email = editCustomer.Email;
+            customer.Phone = editCustomer.Phone;
+            customer.StatusID = editCustomer.StatusID;
+            customer.RemoveFromViewFlag = editCustomer.RemoveFromViewFlag;
+
+            if (errorList.Count > 0)
+            {
+                //  we need to clear the "track changes" otherwise we leave our entity system in flux
+                _hogWildContext.ChangeTracker.Clear();
+                //  throw the list of business processing error(s)
+                throw new AggregateException("Unable to add or edit customer. Please check error message(s)", errorList);
+            }
+            else
+            {
+                //  new customer
+                if (customer.CustomerID == 0)
+                    _hogWildContext.Customers.Add(customer);
+                else
+                    _hogWildContext.Customers.Update(customer);
+                _hogWildContext.SaveChanges();
+            }
+
+            return GetCustomer(customer.CustomerID);
         }
     }
 }
