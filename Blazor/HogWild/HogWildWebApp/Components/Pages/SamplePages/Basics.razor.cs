@@ -1,5 +1,5 @@
-﻿using HogWildWebApp.HelperClasses;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
+using HogWildWebApp.Components;
 
 namespace HogWildWebApp.Components.Pages.SamplePages
 {

@@ -24,6 +24,7 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
     .AddIdentityCookies();
+
 // Add services to the container.
 //  :given (This is code that is provided when we create our application)
 //  supplied database connection due to the fact that we created this
@@ -53,7 +54,6 @@ builder.Services.AddBackendDependencies(options =>
     options.UseSqlServer(connectionStringHogWild));
 
 
-
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -63,8 +63,6 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddMudServices();
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

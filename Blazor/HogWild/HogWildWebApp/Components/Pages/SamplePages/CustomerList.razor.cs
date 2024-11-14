@@ -2,7 +2,6 @@
 using HogWildSystem.ViewModels;
 using Microsoft.AspNetCore.Components.QuickGrid;
 using Microsoft.AspNetCore.Components;
-using HogWildWebApp.HelperClasses;
 
 namespace HogWildWebApp.Components.Pages.SamplePages
 {
@@ -81,6 +80,14 @@ namespace HogWildWebApp.Components.Pages.SamplePages
                     feedbackMessage = "No customer were found for your search criteria";
                 }
             }
+            catch (ArgumentNullException ex)
+            {
+                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
+            }
+            catch (ArgumentException ex)
+            {
+                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
+            }
             catch (AggregateException ex)
             {
                 //  have a collection of errors
@@ -94,14 +101,6 @@ namespace HogWildWebApp.Components.Pages.SamplePages
                 {
                     errorDetails.Add(error.Message);
                 }
-            }
-            catch (ArgumentNullException ex)
-            {
-                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
             }
         }
 
