@@ -1,17 +1,17 @@
 ﻿using HogWildSystem.BLL;
 using HogWildSystem.ViewModels;
+using HogWildWebApp.HelperClasses;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using MudBlazor;
+//using Mono.TextTemplating;
+using System.Drawing;
 
 namespace HogWildWebApp.Components.Pages.SamplePages
 {
-
     public partial class CustomerEdit
     {
         #region Fields
-
-        // The Customer
+        // The customer
         private CustomerEditView customer = new();
         //  The provinces
         private List<LookupView> provinces = new();
@@ -19,84 +19,73 @@ namespace HogWildWebApp.Components.Pages.SamplePages
         private List<LookupView> countries = new();
         //  The status lookup
         private List<LookupView> statusLookup = new();
-        // close button text
+        //  list of invoices
+        private List<InvoiceView> invoices = new List<InvoiceView>();
+        //  Disable the new/edit buttons if we have unsave changes
+        //  NOTE: This should be call disableAddEditInvoice buttons
+        //          button the PowerPoint slides had already
+        //          been created
+        private bool disableViewButton => !disableSaveButton;
+
+        #endregion
+
+        #region Validation
         private string closeButtonText = "Close";
-        // close button color
-        private Color closeButtonColor = Color.Success;
-        // disable the save button if customer is not modified or validate (we have errors)
-        private bool disableSaveButton => !editContext.IsModified() || !editContext.Validate();
         // the edit context
         private EditContext editContext;
+
+        //  disable save button
+        private bool disableSaveButton => !editContext.IsModified() || !editContext.Validate();
+
         //  used to store the validation message
         private ValidationMessageStore messageStore;
 
-        /// <summary>
-        /// The show dialog
-        /// </summary>
-        private bool showDialog = false;
-        /// <summary>
-        /// The dialog message
-        /// </summary>
-        private string dialogMessage = string.Empty;
-        /// <summary>
-        /// The dialog completion source
-        /// </summary>
-        private TaskCompletionSource<bool?> dialogCompletionSource;
 
-        /// <summary>
-        /// Shows the dialog.
-        /// </summary>
-        private async Task ShowDialog()
-        {
-            dialogMessage = "Do you wish to close the invoice editor?";
-            showDialog = true;
-        }
         #endregion
 
         #region Feedback & Error Messages
-
-        // The feedback message
+        //  placeholder for feedback message
         private string feedbackMessage;
 
-        // The error message
-        private string errorMessage;
+        //  placeholder for error messasge
+        private string? errorMessage;
 
-        // has feedback
+        //  return has feedback
         private bool hasFeedback => !string.IsNullOrWhiteSpace(feedbackMessage);
 
-        // has error
+        //  return has error
         private bool hasError => !string.IsNullOrWhiteSpace(errorMessage);
 
-        // error details
+        //  used to display any collection of errors on web page
+        //  whether the errors are generated locally or come from the class library
         private List<string> errorDetails = new();
-
         #endregion
 
         #region Properties
-
         //  The customer service
         [Inject] protected CustomerService CustomerService { get; set; }
 
         //  The category lookup service
         [Inject] protected CategoryLookupService CategoryLookupService { get; set; }
 
-        // Injects the NavigationManager dependency.
+        //  The invoice service
+        [Inject] protected InvoiceService InvoiceService { get; set; }
+
+        //   Injects the NavigationManager dependency
         [Inject]
         protected NavigationManager NavigationManager { get; set; }
 
-        // The dialog service
-        [Inject]
-        protected IDialogService DialogService { get; set; }
+        // the dialog service
+        //[Inject]
+        //protected IDialogService DialogService { get; set; }
 
         //  Customer ID used to create or edit a customer
         [Parameter] public int CustomerID { get; set; } = 0;
-
         #endregion
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            
             try
             {
                 //  edit context needs to be setup after data has been initialized
@@ -112,11 +101,22 @@ namespace HogWildWebApp.Components.Pages.SamplePages
                 //  this event will fire each time the data in a property has change.
                 editContext.OnFieldChanged += EditContext_OnFieldChanged;
 
-                // check to see if we are navigating using a valid customer CustomerID
-                //      or are we going to create a new customer
+                //  reset the error detail list
+                errorDetails.Clear();
+
+                //  reset the error message to an empty string
+                errorMessage = string.Empty;
+
+                //  reset feedback message to an empty string
+                feedbackMessage = String.Empty;
+
+
+                //  check to see if we are navigating using a valid customer CustomerID.
+                //      or are we going to create a new customer.
                 if (CustomerID > 0)
                 {
                     customer = CustomerService.GetCustomer(CustomerID);
+                    invoices = InvoiceService.GetCustomerInvoices(CustomerID);
                 }
 
                 // lookups
@@ -125,6 +125,14 @@ namespace HogWildWebApp.Components.Pages.SamplePages
                 statusLookup = CategoryLookupService.GetLookups("Customer Status");
 
                 await InvokeAsync(StateHasChanged);
+            }
+            catch (ArgumentNullException ex)
+            {
+                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
+            }
+            catch (ArgumentException ex)
+            {
+                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
             }
             catch (AggregateException ex)
             {
@@ -140,18 +148,6 @@ namespace HogWildWebApp.Components.Pages.SamplePages
                 {
                     errorDetails.Add(error.Message);
                 }
-            }
-            catch (ArgumentNullException ex)
-            {
-                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
-            }
-            catch (ArgumentException ex)
-            {
-                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
             }
         }
 
@@ -192,40 +188,23 @@ namespace HogWildWebApp.Components.Pages.SamplePages
             //    you will need to add it.  
             editContext.Validate();
             closeButtonText = editContext.IsModified() ? "Cancel" : "Close";
-            closeButtonColor = editContext.IsModified() ? Color.Warning : Color.Default;
         }
 
+        // save the customer
         private void Save()
         {
+            //  reset the error detail list
+            errorDetails.Clear();
+
+            //  reset the error message to an empty string
+            errorMessage = string.Empty;
+
+            //  reset feedback message to an empty string
+            feedbackMessage = String.Empty;
             try
             {
-                //  reset the error detail list
-                errorDetails.Clear();
-
-                //  reset the error message to an empty string
-                errorMessage = string.Empty;
-
-                //  reset feedback message to an empty string
-                feedbackMessage = string.Empty;
-
-                //  saving the customer
-                customer = CustomerService.AddEditCustomer(customer);
-                feedbackMessage = "Data was successfully saved";
-
-            }
-            catch (AggregateException ex)
-            {
-                //  have a collection of errors
-                //  each error should be place into a separate line
-                if (!string.IsNullOrWhiteSpace(errorMessage))
-                {
-                    errorMessage = $"{errorMessage}{Environment.NewLine}";
-                }
-                errorMessage = $"{errorMessage}Unable to search for customer";
-                foreach (var error in ex.InnerExceptions)
-                {
-                    errorDetails.Add(error.Message);
-                }
+                customer = CustomerService.Save(customer);
+                feedbackMessage = "Data was successfully saved!";
             }
             catch (ArgumentNullException ex)
             {
@@ -235,51 +214,59 @@ namespace HogWildWebApp.Components.Pages.SamplePages
             {
                 errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
             }
-            catch (Exception ex)
+            catch (AggregateException ex)
             {
-                errorMessage = BlazorHelperClass.GetInnerException(ex).Message;
-            }
-            
-        }
-
-        /// <summary>
-        /// Closes this instance.
-        /// </summary>
-        private async Task Cancel()
-        {
-            // Initialize the TaskCompletionSource
-            dialogCompletionSource = new TaskCompletionSource<bool?>();
-            dialogMessage = "Do you wish to close the customer editor?";
-            showDialog = true;
-            bool? results = await ShowDialogAsync();
-            if ((bool)results)
-            {
-                NavigationManager.NavigateTo($"/SamplePages/CustomerList");
+                //  have a collection of errors
+                //  each error should be place into a separate line
+                if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    errorMessage = $"{errorMessage}{Environment.NewLine}";
+                }
+                errorMessage = $"{errorMessage}Unable to save the customer";
+                foreach (var error in ex.InnerExceptions)
+                {
+                    errorDetails.Add(error.Message);
+                }
             }
         }
 
-        /// <summary>
-        /// Show dialog as an asynchronous operation.
-        /// </summary>
-        /// <returns>A Task&lt;System.Boolean&gt; representing the asynchronous operation.</returns>
-        private async Task<bool?> ShowDialogAsync()
+        private async void Cancel()
         {
-            // Initialize the TaskCompletionSource
-            dialogCompletionSource = new TaskCompletionSource<bool?>();
+            NavigationManager.NavigateTo("/SamplePages/CustomerList");
+        }
 
-            // Wait for the dialog to be closed and return the result
-            return await dialogCompletionSource.Task;
+        /// New invoice with QuickGrid
+        private void NewInvoiceQuickGrid()
+        {
+            //  NOTE:   we will hard code employee ID (1)            
+            NavigationManager.NavigateTo($"/SamplePages/InvoiceEditQuickGrid/0/{CustomerID}/1");
         }
 
         /// <summary>
-        /// Simples the dialog result.
+        /// Edit the invoice with QuickGrid
         /// </summary>
-        /// <param name="result">if set to <c>true</c> [result].</param>
-        private void SimpleDialogResult(bool? result)
+        /// <param name="invoiceID">The invoice identifier.</param>
+        private void EditInvoiceQuickGrid(int invoiceID)
         {
-            showDialog = false;
-            dialogCompletionSource.SetResult(result);
+            //  NOTE:   we will hard code employee ID (1)            
+            NavigationManager.NavigateTo($"/SamplePages/InvoiceEditQuickGrid/{invoiceID}/{CustomerID}/1");
+        }
+
+        /// New invoice with Table
+        private void NewInvoiceTable()
+        {
+            //  NOTE:   we will hard code employee ID (1)            
+            NavigationManager.NavigateTo($"/SamplePages/InvoiceEditTable/0/{CustomerID}/1");
+        }
+
+        /// <summary>
+        /// Edit the invoice with Table
+        /// </summary>
+        /// <param name="invoiceID">The invoice identifier.</param>
+        private void EditInvoiceTable(int invoiceID)
+        {
+            //  NOTE:   we will hard code employee ID (1)            
+            NavigationManager.NavigateTo($"/SamplePages/InvoiceEditTable/{invoiceID}/{CustomerID}/1");
         }
     }
 }
-

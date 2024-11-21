@@ -1,0 +1,25 @@
+﻿@page "/SamplePages/FromPage"
+<h3>From Page</h3>
+
+<header>
+    <p>
+        <label>
+            First Name : 
+            <input type="text" @bind="employee.FirstName" />
+        </label>
+    </p>
+    <p>
+        <label>
+            Last Name :
+            <input type="text" @bind="employee.LastName" />
+        </label>
+    </p>
+    <p>
+        <label>
+            Age :
+            <input type="text" @bind="employee.Age" />
+        </label>
+    </p>
+    <button class="btn-success"
+            @onclick="(() => SendToPage())">Send</button>
+</header>

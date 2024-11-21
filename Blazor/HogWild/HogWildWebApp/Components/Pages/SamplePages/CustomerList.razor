@@ -34,23 +34,24 @@
                 <option>5</option>
                 <option>10</option>
                 <option>20</option>
-                <option>100</option>
+                <option>100</option> 
             </select>
         </div>
 
+        
         <!-- This section defines a QuickGrid for displaying customer information-->
         <QuickGrid Items="@Customers.AsQueryable()" Pagination="@Pagination" class="quickgrid-row-divider">
             <!-- Add buttons using TemplateColumn -->
-            <TemplateColumn>
+            <TemplateColumn >
                 <button class="btn-primary" @onclick="() => EditCustomer(context.CustomerID)">Edit</button>
                 <button class="btn-primary" @onclick="() => NewInvoice(context.CustomerID)">New Invoice</button>
             </TemplateColumn>
-            <PropertyColumn Property="@(p => p.FirstName)" Sortable="true" />
-            <PropertyColumn Property="@(p => p.LastName)" Sortable="true" />
-            <PropertyColumn Property="@(p => p.City)" Sortable="true" />
-            <PropertyColumn Property="@(p => p.Phone)" Sortable="true" />
-            <PropertyColumn Property="@(p => p.Email)" Sortable="true" />
-            <PropertyColumn Property="@(p => p.TotalSales)" Sortable="true" />
+            <PropertyColumn Property="@(p => p.FirstName)" Sortable="true"/>
+            <PropertyColumn Property="@(p => p.LastName)" Sortable="true"/>
+            <PropertyColumn Property="@(p => p.City)" Sortable="true"/>
+            <PropertyColumn Property="@(p => p.Phone)" Sortable="true"/>
+            <PropertyColumn Property="@(p => p.Email)" Sortable="true"/>
+            <PropertyColumn Property="@(p => p.TotalSales)" Sortable="true"/>
         </QuickGrid>
 
         <Paginator State="@Pagination" />

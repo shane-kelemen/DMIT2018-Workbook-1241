@@ -1,0 +1,35 @@
+﻿@page "/SamplePages/ListToList"
+@using Microsoft.AspNetCore.Components.QuickGrid;
+
+<h3>List to List</h3>
+<div id="container">
+    <div>
+        <QuickGrid Items="@Inventory.AsQueryable()"  Class="quickgrid-row-divider">
+            <TemplateColumn>
+                <CellTemplate Context="part">
+                    <button class="btn-success" @onclick="() => AddPartToCart(context.PartID)">Add</button>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="@(p => p.PartID)" Title="Part ID" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Description)" Title="Description" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Cost)" Title="Cost" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Price)" Title="Price" Sortable="true" />
+            <PropertyColumn Property="@(p => p.QOH)" Title="QOH" Sortable="true" />
+        </QuickGrid>
+    </div>
+    <div>
+        <QuickGrid Items="@ShoppingCart.AsQueryable()" Class="quickgrid-row-divider">
+            <TemplateColumn>
+                <CellTemplate Context="invoiceLine">
+                    <button class="btn-danger" @onclick="() => RemovePartFromCart(context.PartID)">Remove</button>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="@(p => p.InvoiceLineID)" Title="Invoice Line ID" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Description)" Title="Description" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Price)" Title="Price" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Quantity)" Title="Quantity" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Taxable)" Title="Taxable" Sortable="true" />
+            <PropertyColumn Property="@(p => p.ExtentPrice)" Title="Extended Price" Sortable="true" />
+        </QuickGrid>
+    </div>
+</div>
