@@ -2,6 +2,7 @@ using HogWildSystem;
 using HogWildWebApp.Components;
 using HogWildWebApp.Components.Account;
 using HogWildWebApp.Data;
+using HogWildWebApp.Persistance;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddScoped<AppState>(); // This line is where the magic happens that allows you to use the AppState class
+                                        // to pass a class object from one component (page) to another component.
+
+// The following are dedicated and automatically added when you choose
+// Individual Accounts when setting some of the details for your
+// Web Application.
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -24,7 +31,6 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
     .AddIdentityCookies();
-
 // Add services to the container.
 //  :given (This is code that is provided when we create our application)
 //  supplied database connection due to the fact that we created this
@@ -54,6 +60,7 @@ builder.Services.AddBackendDependencies(options =>
     options.UseSqlServer(connectionStringHogWild));
 
 
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -63,6 +70,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddMudServices();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
