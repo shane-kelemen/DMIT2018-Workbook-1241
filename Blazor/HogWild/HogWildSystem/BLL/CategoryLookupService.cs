@@ -1,25 +1,20 @@
 ﻿using HogWildSystem.DAL;
+using HogWildSystem.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HogWildSystem.ViewModels;
 
 namespace HogWildSystem.BLL
 {
     public class CategoryLookupService
     {
-        #region Fields
-
         private readonly HogWildContext _hogWildContext;
 
-        #endregion
-
-        //  Constructor for the WorkingVersionsService class.
+        //  Constructor for the CategoryLookupService class.
         internal CategoryLookupService(HogWildContext hogWildContext)
         {
-            //  Initialize the _hogWildContext field with the provided HogWoldContext instance.
             _hogWildContext = hogWildContext;
         }
 

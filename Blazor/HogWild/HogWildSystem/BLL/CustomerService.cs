@@ -7,17 +7,19 @@ namespace HogWildSystem.BLL
 {
     public class CustomerService
     {
-
         #region Fields
 
+        /// <summary>
+        /// The hog wild context
+        /// </summary>
         private readonly HogWildContext _hogWildContext;
 
         #endregion
 
-        //  Constructor for the WorkingVersionsService class.
+        // Constructor for the WorkingVersionService class.
         internal CustomerService(HogWildContext hogWildContext)
         {
-            //  Initialize the _hogWildContext field with the provided HogWoldContext instance.
+            // Initialize the _hogWildContext field with the provided HogWildContext instance.
             _hogWildContext = hogWildContext;
         }
 
@@ -47,23 +49,23 @@ namespace HogWildSystem.BLL
             }
 
             return _hogWildContext.Customers
-                        .Where(x => (x.LastName.Contains(lastName.Trim())
-                                     || x.Phone.Contains(phone.Trim()))
-                                    && !x.RemoveFromViewFlag)
-                        .Select(x => new CustomerSearchView
-                        {
-                            CustomerID = x.CustomerID,
-                            FirstName = x.FirstName,
-                            LastName = x.LastName,
-                            City = x.City,
-                            Phone = x.Phone,
-                            Email = x.Email,
-                            StatusID = x.StatusID,
-                            TotalSales = x.Invoices.Sum(x => x.SubTotal + x.Tax)
-                        })
-                        .OrderByDescending(x => x.TotalSales)
-                        .ThenBy(x => x.LastName)
-                        .ToList();
+                .Where(x => (x.LastName.Contains(lastName.Trim())
+                             || x.Phone.Contains(phone.Trim()))
+                            && !x.RemoveFromViewFlag)
+                .Select(x => new CustomerSearchView
+                {
+                    CustomerID = x.CustomerID,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    City = x.City,
+                    Phone = x.Phone,
+                    Email = x.Email,
+                    StatusID = x.StatusID,
+                    TotalSales = x.Invoices.Sum(x => x.SubTotal + x.Tax)
+                })
+                .OrderByDescending(x => x.TotalSales)
+                .ThenBy(x => x.LastName)
+                .ToList();
         }
 
         public CustomerEditView GetCustomer(int customerID)
@@ -99,7 +101,8 @@ namespace HogWildSystem.BLL
                 }).FirstOrDefault();
         }
 
-        public CustomerEditView AddEditCustomer(CustomerEditView editCustomer)
+        //  Customer Save
+        public CustomerEditView Save(CustomerEditView editCustomer)
         {
             #region Business Logic and Parameter Exceptions
             //	create a list<Exception> to contain all discovered errors
@@ -149,20 +152,11 @@ namespace HogWildSystem.BLL
                     errorList.Add(new Exception("Customer already exist in the database and cannot be enter again"));
                 }
             }
-
-            if (errorList.Count > 0)
-            {
-                //  we need to clear the "track changes" otherwise we leave our entity system in flux
-                _hogWildContext.ChangeTracker.Clear();
-                //  throw the list of business processing error(s)
-                throw new AggregateException("Unable to add or edit customer. Please check error message(s)", errorList);
-            }
-
-
             #endregion
+
             Customer customer =
                 _hogWildContext.Customers.Where(x => x.CustomerID == editCustomer.CustomerID)
-                            .Select(x => x).FirstOrDefault();
+                    .Select(x => x).FirstOrDefault();
 
             //  new customer
             if (customer == null)
@@ -199,8 +193,9 @@ namespace HogWildSystem.BLL
                     _hogWildContext.Customers.Update(customer);
                 _hogWildContext.SaveChanges();
             }
-
-            return GetCustomer(customer.CustomerID);
+            //  can return current editCustomer
+            editCustomer.CustomerID = customer.CustomerID;
+            return editCustomer;
         }
     }
 }
